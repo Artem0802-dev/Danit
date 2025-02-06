@@ -1,0 +1,12 @@
+[Unit]
+Description=Watch ~/watch directory for new files
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /home/bob/watch_dir.sh
+Restart=always
+User=bob
+Group=wheel
+
+[Install]
+WantedBy=multi-user.target
