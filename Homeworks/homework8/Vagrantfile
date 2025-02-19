@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Use Ubuntu 22.04 as the base box
+  config.vm.box = "ubuntu/jammy64"
+
+  # Configure a public network (bridged to the host's network)
+  config.vm.network "public_network"
+
+  # Provision the VM to install and configure Nginx
+  config.vm.provision "shell", inline: <<-SHELL
+    # Update the package list
+    sudo apt-get update -y
+
+    # Install Nginx
+    sudo apt-get install -y nginx
+
+    # Change the default Nginx port from 80 to 82
+    sudo sed -i 's/listen 80 default_server;/listen 82 default_server;/g' /etc/nginx/sites-available/default
+    sudo sed -i 's/listen [::]:80 default_server;/listen [::]:82 default_server;/g' /etc/nginx/sites-available/default
+
+    # Restart Nginx to apply the changes
+    sudo systemctl restart nginx
+
+    # Ensure Nginx is enabled to start on boot
+    sudo systemctl enable nginx
+
+    # Create a custom welcome page (optional)
+    echo "<html><body><h1>Welcome to My Custom Nginx Page!</h1></body></html>" | sudo tee /var/www/html/index.html
+  SHELL
+
+  # Set the hostname for the VM
+  config.vm.hostname = "nginx-vm"
+
+  # Customize the VM name in VirtualBox
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "Ubuntu-Nginx-VM"
+  end
+end
